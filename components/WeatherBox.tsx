@@ -23,7 +23,7 @@ export default function WeatherBox() {
 
   const fetchWeather = async (cityName: string) => {
     try {
-      const apiKey = process.env.NEXT_PUBLIC_WEATHERAPI_KEY;
+      const apiKey = process.env.91195e1ea1fd4e26873150128251602;
       const response = await fetch(
         `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${encodeURIComponent(cityName)}&aqi=no`
       );
