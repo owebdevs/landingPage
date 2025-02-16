@@ -75,4 +75,7 @@
     animation: twinkle 2s ease-in-out infinite;
   }
 }
+body {
+  cursor: url('/lightning-cursor.png'), auto;
+}
 

@@ -21,25 +21,33 @@ export default function WeatherBox() {
     }
   }, [])
 
-  const fetchWeather = async (lat: number, lon: number) => {
-    const apiKey = process.env.NEXT_PUBLIC_OPENWEATHERMAP_API_KEY
-    const response = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=metric`,
-    )
-    return await response.json()
-  }
+  const fetchWeather = async (cityName: string) => {
+    try {
+      const apiKey = process.env.NEXT_PUBLIC_WEATHERAPI_KEY;
+      const response = await fetch(
+        `https://api.weatherapi.com/v1/current.json?key=${apiKey}&q=${encodeURIComponent(cityName)}&aqi=no`
+      );
+      if (!response.ok) {
+        throw new Error("City not found. Please try again.");
+      }
+      const data = await response.json();
+      setWeather(data);
+      setCity(data.location.name);
+      setError(null); // Clear any previous errors
+    } catch (err) {
+      setError("City not found. Please enter a valid city.");
+      setWeather(null);
+    }
+  };
+  
 
   const handleCitySubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const apiKey = process.env.NEXT_PUBLIC_OPENWEATHERMAP_API_KEY
-    const response = await fetch(
-      `https://api.openweathermap.org/data/2.5/weather?q=${inputCity}&appid=${apiKey}&units=metric`,
-    )
-    const data = await response.json()
-    setWeather(data)
-    setCity(data.name)
-    setInputCity("")
-  }
+    e.preventDefault();
+    if (!inputCity.trim()) return;
+    await fetchWeather(inputCity);
+    setInputCity("");
+  };
+   
 
   const getWeatherIcon = (condition: string) => {
     switch (condition?.toLowerCase()) {
@@ -60,13 +68,16 @@ export default function WeatherBox() {
     <div className="pixel-border bg-[#1a1b3b] p-6 text-white">
       <h2 className="text-2xl font-bold mb-4 pixel-font text-center">Weather Status</h2>
       {weather && (
-        <div className="text-center space-y-4">
-          <div className="flex justify-center">{getWeatherIcon(weather.weather?.[0]?.main)}</div>
-          <p className="text-xl pixel-font">{city}</p>
-          <p className="text-3xl font-bold pixel-font">{Math.round(weather.main?.temp)}°C</p>
-          <p className="text-blue-400">{weather.weather?.[0]?.description}</p>
-        </div>
-      )}
+  <div className="text-center space-y-4">
+    <div className="flex justify-center">
+      {getWeatherIcon(weather.current.condition.text)}
+    </div>
+    <p className="text-xl font-bold">{city}</p>
+    <p className="text-3xl font-bold">{Math.round(weather.current.temp_c)}°C</p>
+    <p className="text-blue-400">{weather.current.condition.text}</p>
+  </div>
+)}
+
       <form onSubmit={handleCitySubmit} className="mt-4 space-y-2">
         <input
           type="text"
@@ -85,4 +96,3 @@ export default function WeatherBox() {
     </div>
   )
 }
-
